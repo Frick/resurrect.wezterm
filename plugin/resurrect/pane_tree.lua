@@ -134,8 +134,17 @@ local function insert_panes(root, panes)
 	end
 
 	if #bottom > 0 then
-		local bottom_child = pop_connected_bottom(root, bottom)
-		root.bottom = insert_panes(bottom_child, bottom)
+		-- Filter out panes already consumed by the right branch.
+		-- insert_panes sets pane = nil on every node it processes,
+		-- so pane.pane == nil means the pane was already visited.
+		local unprocessed = {}
+		for _, pane in ipairs(bottom) do
+			if pane.pane ~= nil then
+				table.insert(unprocessed, pane)
+			end
+		end
+		local bottom_child = pop_connected_bottom(root, unprocessed)
+		root.bottom = insert_panes(bottom_child, unprocessed)
 	end
 
 	return root
