@@ -1,10 +1,16 @@
 local wezterm = require("wezterm")
 
 -- Add this plugin's own directory to the Lua path so require("resurrect.xxx") works.
--- debug.getinfo source is "@/path/to/plugin/init.lua"; strip "@" and filename.
-local src = debug.getinfo(1, "S").source:sub(2)
-local plugin_dir = src:match("(.*)/[^/]+$") or src
-package.path = plugin_dir .. "/?.lua;" .. plugin_dir .. "/?/init.lua;" .. package.path
+-- WezTerm sandboxes plugins and strips the debug library, so we use wezterm.plugin.list()
+-- to locate our own plugin_dir and add its plugin/ subdirectory to package.path.
+local sep = package.config:sub(1, 1)
+for _, p in ipairs(wezterm.plugin.list()) do
+    if p.url:find("resurrect.wezterm", 1, true) then
+        local dir = p.plugin_dir .. sep .. "plugin"
+        package.path = dir .. sep .. "?.lua;" .. dir .. sep .. "?" .. sep .. "init.lua;" .. package.path
+        break
+    end
+end
 
 local pub = {}
 
