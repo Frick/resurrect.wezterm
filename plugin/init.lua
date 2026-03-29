@@ -1,11 +1,13 @@
 local wezterm = require("wezterm")
 
--- Add this plugin's own directory to the Lua path so require("resurrect.xxx") works.
--- WezTerm sandboxes plugins and strips the debug library, so we use wezterm.plugin.list()
--- to locate our own plugin_dir and add its plugin/ subdirectory to package.path.
+-- WezTerm loads plugins as require(component), passing the URL-encoded component
+-- name as the first vararg to the main chunk. Match it against wezterm.plugin.list()
+-- to unambiguously find our own plugin_dir and add plugin/ to package.path.
+-- This works correctly even when multiple resurrect forks are cached on disk.
+local component = ...
 local sep = package.config:sub(1, 1)
 for _, p in ipairs(wezterm.plugin.list()) do
-    if p.url:find("resurrect.wezterm", 1, true) then
+    if p.component == component then
         local dir = p.plugin_dir .. sep .. "plugin"
         package.path = dir .. sep .. "?.lua;" .. dir .. sep .. "?" .. sep .. "init.lua;" .. package.path
         break
