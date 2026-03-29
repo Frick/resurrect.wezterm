@@ -1,30 +1,18 @@
-local wezterm = require("wezterm") --[[@as Wezterm]] --- this type cast invokes the LSP module for Wezterm
-local dev = wezterm.plugin.require("https://github.com/chrisgve/dev.wezterm")
+local wezterm = require("wezterm")
+
+-- Add this plugin's own directory to the Lua path so require("resurrect.xxx") works.
+-- debug.getinfo source is "@/path/to/plugin/init.lua"; strip "@" and filename.
+local src = debug.getinfo(1, "S").source:sub(2)
+local plugin_dir = src:match("(.*)/[^/]+$") or src
+package.path = plugin_dir .. "/?.lua;" .. plugin_dir .. "/?/init.lua;" .. package.path
 
 local pub = {}
 
---- checks if the user is on windows
-local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
-local separator = is_windows and "\\" or "/"
-
-local function init()
-	-- enable_sub_modules()
-	local opts = {
-		auto = true,
-		keywords = { "github", "MLFlexer", "resurrect", "wezterm" },
-	}
-	local plugin_path = dev.setup(opts)
-
-	require("resurrect.state_manager").change_state_save_dir(plugin_path .. separator .. "state" .. separator)
-
-	-- Export submodules
-	pub.workspace_state = require("resurrect.workspace_state")
-	pub.window_state = require("resurrect.window_state")
-	pub.tab_state = require("resurrect.tab_state")
-	pub.fuzzy_loader = require("resurrect.fuzzy_loader")
-	pub.state_manager = require("resurrect.state_manager")
-end
-
-init()
+-- Export submodules
+pub.workspace_state = require("resurrect.workspace_state")
+pub.window_state    = require("resurrect.window_state")
+pub.tab_state       = require("resurrect.tab_state")
+pub.fuzzy_loader    = require("resurrect.fuzzy_loader")
+pub.state_manager   = require("resurrect.state_manager")
 
 return pub

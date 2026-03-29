@@ -159,4 +159,13 @@ function pub.set_max_nlines(max_nlines)
 	require("resurrect.pane_tree").max_nlines = max_nlines
 end
 
+-- Default save directory: $XDG_DATA_HOME/wezterm/resurrect  (Linux/macOS)
+--                         %APPDATA%\wezterm\resurrect        (Windows)
+-- Override at any time with pub.change_state_save_dir(path).
+if utils.is_windows then
+	pub.change_state_save_dir((os.getenv("APPDATA") or wezterm.home_dir) .. "\\wezterm\\resurrect\\")
+else
+	pub.change_state_save_dir(wezterm.home_dir .. "/.local/share/wezterm/resurrect/")
+end
+
 return pub
